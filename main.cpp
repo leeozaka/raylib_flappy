@@ -25,7 +25,7 @@ private:
 
 public:
   ObstacleManager(Image image, float speed, Vector2 defaultLocation,
-                  int spaceLength = 1) {
+                  int spaceLength) {
     mImage = image;
     mSpeed = speed;
     mSpaceLength = spaceLength;
@@ -44,7 +44,7 @@ public:
   int getSpaceLength() { return mSpaceLength; }
   std::vector<Obstacle> getObstacles() { return mObstacles; }
 
-  Obstacle createObstacle(int position, float height = -1) {
+  Obstacle createObstacle(int position, float height) {
     Obstacle o;
     if (height < 0)
       height = (rand() % 10) * 30;
@@ -55,7 +55,7 @@ public:
     o.position = position;
     Image currentImage = ImageCopy(mImage);
     if (position <= 0) {
-      o.location.y = -o.height;
+      o.location.y = -o.height + 100;
       ImageRotateCW(&currentImage);
       ImageRotateCW(&currentImage);
     } else {
@@ -174,18 +174,6 @@ public:
     else
       currentTexture = mCharacter.textureMid;
 
-    // switch (mCharacter.state) {
-    // case CHAR_STATE_UP:
-    //   currentTexture = mCharacter.textureUp;
-    //   break;
-    // case CHAR_STATE_DOWN:
-    //   currentTexture = mCharacter.textureDown;
-    //   break;
-    // default:
-    //   currentTexture = mCharacter.textureMid;
-    //   break;
-    // }
-
     Rectangle currentRectangle =
         (Rectangle){mCharacter.location.x, mCharacter.location.y,
                     mCharacter.rectangle.width, mCharacter.rectangle.height};
@@ -268,7 +256,7 @@ int main() {
   ObstacleManager obstacleManager(
       obstacleImage, speed,
       (Vector2){(float)screenWidth, (float)(screenHeight - baseTexture.height)},
-      500);
+      200);
 
   while (!WindowShouldClose()) {
     BeginDrawing();
@@ -296,19 +284,13 @@ int main() {
     obstacleManager.drawObstacles();
 
     characterPosition = characterController.onUpdate();
-    currentBackgroundPosition += (frameSpeed / 2);
+    currentBackgroundPosition += (frameSpeed);
     currentBasePosition += frameSpeed;
 
     if (currentBackgroundPosition >= screenWidth)
       currentBackgroundPosition -= screenWidth;
     if (currentBasePosition >= (float)screenWidth / 2)
       currentBasePosition -= (float)screenWidth / 2;
-
-    // if (collision) {
-    //   std::cout << "Collision" << std::endl;
-    // }
-    // DrawText("", int posX, int posY, int fontSize, Color color)
-    // std::cout << "Pos: " << characterPosition.y << std::endl;
 
     DrawFPS(10, 10);
     if (floor_collision) {
