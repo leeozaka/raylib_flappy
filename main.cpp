@@ -1,7 +1,7 @@
 #include "raylib.h"
 #include <cstdlib>
-#include <iostream>
 #include <vector>
+// #include <iostream>
 
 // g++ main.cpp -o flappy -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 
@@ -25,7 +25,7 @@ private:
 
 public:
   ObstacleManager(Image image, float speed, Vector2 defaultLocation,
-                  int spaceLength = 15) {
+                  int spaceLength = 1) {
     mImage = image;
     mSpeed = speed;
     mSpaceLength = spaceLength;
@@ -246,7 +246,7 @@ int main() {
   Texture2D characterDownTexture = LoadTextureFromImage(characterImage);
   UnloadImage(characterImage);
 
-  SetTargetFPS(60);
+  SetTargetFPS(120);
 
   float speed = 150, characterSpeed = 18;
 
@@ -274,10 +274,10 @@ int main() {
     BeginDrawing();
 
     ClearBackground(RAYWHITE);
-
-    // floor_collision = characterPosition.y >= 600 ? true : false;
-    floor_collision =
-        characterPosition.y >= screenWidth - baseImage.height ? true : false;
+    floor_collision = characterPosition.y + (characterImage.height * 1.5) >=
+                              screenWidth - baseImage.height
+                          ? true
+                          : false;
 
     float frameSpeed = GetFrameTime() * speed;
     obstacleManager.setSpeed(frameSpeed);
@@ -301,8 +301,8 @@ int main() {
 
     if (currentBackgroundPosition >= screenWidth)
       currentBackgroundPosition -= screenWidth;
-    if (currentBasePosition >= screenWidth)
-      currentBasePosition -= screenWidth;
+    if (currentBasePosition >= (float)screenWidth / 2)
+      currentBasePosition -= (float)screenWidth / 2;
 
     // if (collision) {
     //   std::cout << "Collision" << std::endl;
