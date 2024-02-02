@@ -131,7 +131,6 @@ private:
   Character mCharacter;
   float mGraviationSpeed;
   float mElapsedTime;
-  void rotate(float angle);
 
   Vector2 gravitationModifier() {
     if (mCharacter.state == CHAR_STATE_UP)
