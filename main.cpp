@@ -5,7 +5,7 @@
 
 // g++ main.cpp -o flappy -lraylib -lGL -lm -lpthread -ldl -lrt -lX11
 
-enum State { CHAR_STATE_UP, CHAR_STATE_MID, CHAR_STATE_DOWN };
+enum State { CHAR_STATE_UP, CHAR_STATE_MID, CHAR_STATE_DOWN, CHAR_STATE_NULL };
 
 typedef struct Obstacle {
   Vector2 location;
@@ -131,6 +131,7 @@ private:
   Character mCharacter;
   float mGraviationSpeed;
   float mElapsedTime;
+  Sound fxWing = LoadSound("assets/audio/wing.wav");
 
   Vector2 gravitationModifier() {
     if (mCharacter.state == CHAR_STATE_UP)
@@ -160,6 +161,7 @@ public:
     mCharacter.speed = -(mGraviationSpeed * mElapsedTime) - 5;
     mCharacter.location.y += mCharacter.speed;
     mCharacter.angle = -30;
+    PlaySound(fxWing);
     return mCharacter.location;
   }
 
@@ -184,7 +186,7 @@ public:
 
   Vector2 inputHandler() {
     if (IsKeyPressed(KEY_SPACE) ||
-        mCharacter.state == CHAR_STATE_UP && mElapsedTime < 0.15f) {
+        (mCharacter.state == CHAR_STATE_UP && mElapsedTime < 0.15f)) {
       return moveUp();
     }
     return gravitationModifier();
@@ -201,11 +203,13 @@ int main() {
   int screenWidth = 800;
   int screenHeight = 800;
 
-  bool floor_collision, pipe_collision = false;
+  bool floor_collision = false;
 
+  InitAudioDevice();
+  Sound fxHit = LoadSound("assets/audio/hit.wav");
   InitWindow(screenWidth, screenHeight, "Raylib - Flappy Bird");
 
-  Image backgroundImage = LoadImage("assets/sprites/background-day.png");
+  Image backgroundImage = LoadImage("assets/sprites/background-night.png");
   ImageResize(&backgroundImage, screenWidth, screenHeight);
   Texture2D backgroundTexture = LoadTextureFromImage(backgroundImage);
   UnloadImage(backgroundImage);
@@ -256,15 +260,22 @@ int main() {
       obstacleImage, speed,
       (Vector2){(float)screenWidth, (float)(screenHeight - baseTexture.height)},
       200);
-
+  int ring = 0;
   while (!WindowShouldClose()) {
     BeginDrawing();
 
     ClearBackground(RAYWHITE);
-    floor_collision = characterPosition.y + (characterImage.height * 1.5) >=
-                              screenWidth - baseImage.height
-                          ? true
-                          : false;
+
+    if (characterPosition.y + (characterImage.height * 1.5) >=
+        screenWidth - baseImage.height) {
+      floor_collision = true;
+      ring = 1;
+    }
+
+    if (ring) {
+      PlaySound(fxHit);
+      ring = 0;
+    }
 
     float frameSpeed = GetFrameTime() * speed;
     obstacleManager.setSpeed(frameSpeed);
@@ -295,9 +306,11 @@ int main() {
     if (floor_collision) {
       DrawText("Collision!", 10, 30, 20, RED);
     }
+
     EndDrawing();
   }
 
+  CloseAudioDevice();
   CloseWindow();
   return 0;
 }
